@@ -10,49 +10,48 @@ public class ClientTCP {
 
         String serverName = args[0];
         int portNumber = Integer.parseInt(args[1]);
+        short requestId = 1; // Initialize requestId outside the loop
 
         try (Socket socket = new Socket(serverName, portNumber);
              DataInputStream input = new DataInputStream(socket.getInputStream());
              DataOutputStream output = new DataOutputStream(socket.getOutputStream());
              BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
 
-            do{
-		String opName = "";
+            do {
+                String opName = "";
 
                 System.out.print("Enter OpCode (0-5): ");
                 byte opCode = Byte.parseByte(userInput.readLine());
 
-		switch(opCode) {
-		  case 0:
-			opName = "Addition";
-			break;
-		  case 1:
-			opName = "Subtraction";
-			break;
-                  case 2:
+                switch (opCode) {
+                    case 0:
+                        opName = "Addition";
+                        break;
+                    case 1:
+                        opName = "Subtraction";
+                        break;
+                    case 2:
                         opName = "Bitwise Or";
                         break;
-                  case 3:
+                    case 3:
                         opName = "Bitwise And";
                         break;
-                  case 4:
+                    case 4:
                         opName = "Division";
                         break;
-                  case 5:
+                    case 5:
                         opName = "Multiplication";
                         break;
-                  default:
-			System.err.println("Invalid operation code.");
-			break;
-		}
+                    default:
+                        System.err.println("Invalid operation code.");
+                        break;
+                }
 
                 System.out.print("Enter Operand1: ");
                 int operand1 = Integer.parseInt(userInput.readLine());
 
                 System.out.print("Enter Operand2: ");
                 int operand2 = Integer.parseInt(userInput.readLine());
-
-		short requestId = 1;
 
                 long startTime = System.currentTimeMillis(); // Start measuring time
 
@@ -64,7 +63,7 @@ public class ClientTCP {
                 output.writeShort(requestId); // Request ID
                 byte[] opNameBytes = opName.getBytes("UTF-16BE"); // Operation Name in bytes
                 output.writeShort(opNameBytes.length); // Operation Name Length
-		output.write(opNameBytes);
+                output.write(opNameBytes);
                 output.flush();
 
                 // Receive response from server
@@ -82,16 +81,16 @@ public class ClientTCP {
                 System.out.println("Error Code: " + errorCode);
                 System.out.println("Request ID: " + responseId);
                 System.out.println("Round Trip Time: " + roundTripTime + " ms");
-		System.out.println("Continue? yes or no");
-		if(userInput.readLine().equals("yes")) {
-		requestId++;
-		} else {
-		    System.exit(1);
-		  } 
+                System.out.println("Continue? yes or no");
+
+                if (userInput.readLine().equals("yes")) {
+                    requestId++; // Increment requestId if user wants to continue
+                } else {
+                    System.exit(0); // Exit gracefully
+                }
             } while (true);
- 
-        }
-	catch (IOException e) {
+
+        } catch (IOException e) {
             System.err.println("Error communicating with server: " + e.getMessage());
         }
     }
